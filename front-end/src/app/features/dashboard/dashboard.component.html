@@ -1,0 +1,121 @@
+<h1 class="page-title">Dashboard</h1>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40" />
+  </div>
+} @else {
+  <div class="summary">
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Total no mês atual</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="big">{{ totalMonth() | brlCents }}</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Total no ano atual</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="big">{{ totalYear() | brlCents }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="charts">
+    <mat-card appearance="outlined" class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Gastos por categoria (ano)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-wrap">
+          <canvas
+            baseChart
+            [type]="pieType"
+            [data]="pieData"
+            [options]="pieOptions"
+          ></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Gastos por mês (ano corrente)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-wrap chart-wrap--wide">
+          <canvas
+            baseChart
+            [type]="barType"
+            [data]="barData"
+            [options]="barOptions"
+          ></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="tables">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Meses em que mais gastei</mat-card-title>
+        <mat-card-subtitle>Ordenado do maior para o menor total</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <table class="rank-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mês</th>
+              <th class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of monthRank(); track r.key; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ r.label }}</td>
+                <td class="num">{{ r.cents | brlCents }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3">Sem dados no período.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Comparativo mês a mês</mat-card-title>
+        <mat-card-subtitle>Todos os meses com lançamentos no ano</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <table class="rank-table">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of monthCompare(); track r.key) {
+              <tr>
+                <td>{{ r.label }}</td>
+                <td class="num">{{ r.cents | brlCents }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="2">Sem dados no período.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

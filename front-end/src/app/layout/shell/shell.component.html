@@ -1,0 +1,86 @@
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav
+    #drawer
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="!isHandset() || drawerOpen()"
+    class="sidebar"
+  >
+    <div class="sidebar-header">
+      <div class="brand-logo">
+        <mat-icon class="logo-icon">wallet</mat-icon>
+        <div class="brand-text">
+          <div class="brand-name">LEDGER</div>
+          <div class="brand-subtitle">ADMIN</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        class="nav-item"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="onNavClick()"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" routerLink="/expenses" routerLinkActive="active" (click)="onNavClick()">
+        <mat-icon>receipt_long</mat-icon>
+        <span>Gastos</span>
+      </a>
+      <a class="nav-item" routerLink="/categories" routerLinkActive="active" (click)="onNavClick()">
+        <mat-icon>folder</mat-icon>
+        <span>Categorias</span>
+      </a>
+      <a class="nav-item" routerLink="/people" routerLinkActive="active" (click)="onNavClick()">
+        <mat-icon>people</mat-icon>
+        <span>Pessoas</span>
+      </a>
+      <a class="nav-item" routerLink="/payment-methods" routerLinkActive="active" (click)="onNavClick()">
+        <mat-icon>payment</mat-icon>
+        <span>Métodos de pagamento</span>
+      </a>
+      <a class="nav-item" routerLink="/users" routerLinkActive="active" (click)="onNavClick()">
+        <mat-icon>group</mat-icon>
+        <span>Usuários</span>
+      </a>
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <header class="top-header">
+      <div class="header-left">
+        @if (isHandset()) {
+          <button mat-icon-button type="button" (click)="toggleDrawer()" class="menu-button">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+      </div>
+
+      <div class="header-center"></div>
+
+      <div class="header-right">
+        <button mat-icon-button class="icon-button" matTooltip="Notificações">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+        <button mat-icon-button class="icon-button" matTooltip="Configurações">
+          <mat-icon>settings</mat-icon>
+        </button>
+        <div class="user-menu">
+          @if (user(); as u) {
+            <span class="user-initials">{{ (u.name | slice: 0: 1).toUpperCase() }}</span>
+          }
+          <button mat-icon-button (click)="logout()" matTooltip="Sair">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

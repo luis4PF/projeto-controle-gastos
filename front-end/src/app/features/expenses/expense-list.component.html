@@ -1,0 +1,193 @@
+<h1 class="page-title">Gastos</h1>
+
+<mat-card appearance="outlined" class="filters">
+  <mat-card-content>
+    <div class="filter-grid" [formGroup]="filterForm">
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Busca (item, categoria ou detalhe)</mat-label>
+        <input matInput formControlName="q" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>De</mat-label>
+        <input matInput [matDatepicker]="fromP" formControlName="from" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromP" />
+        <mat-datepicker #fromP />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Até</mat-label>
+        <input matInput [matDatepicker]="toP" formControlName="to" />
+        <mat-datepicker-toggle matIconSuffix [for]="toP" />
+        <mat-datepicker #toP />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Categoria (item)</mat-label>
+        <mat-select formControlName="categoryId">
+          <mat-option value="">Todas</mat-option>
+          @for (c of categorySelect; track c.id) {
+            <mat-option [value]="c.id">{{ c.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Ex.: IPVA 2025 é o item; o detalhe fica na coluna ao lado.</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Método de pagamento</mat-label>
+        <mat-select formControlName="paymentMethodId">
+          <mat-option value="">Todos</mat-option>
+          @for (pm of paymentMethods; track pm.id) {
+            <mat-option [value]="pm.id">{{ filterPaymentOptionLabel(pm) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Responsável</mat-label>
+        <input matInput formControlName="responsible" placeholder="Nome" />
+      </mat-form-field>
+      <div class="filter-checkbox">
+        <mat-checkbox formControlName="hideCancelled">Ocultar cancelados</mat-checkbox>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button mat-button type="button" (click)="clearFilters()">Limpar filtros</button>
+      <button mat-flat-button color="primary" type="button" (click)="load()">
+        <mat-icon>refresh</mat-icon>
+        Atualizar
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="toolbar">
+  <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+    <mat-icon>add</mat-icon>
+    Novo gasto
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40" />
+  </div>
+} @else {
+  <div class="table-wrap">
+    <table mat-table [dataSource]="rows()" class="mat-elevation-z1">
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Vencimento / data</th>
+        <td mat-cell *matCellDef="let row">{{ row.date | date: 'dd/MM/yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="item">
+        <th mat-header-cell *matHeaderCellDef>Item</th>
+        <td mat-cell *matCellDef="let row" class="item-cell">
+          <span class="item-primary">{{ itemPrimary(row) }}</span>
+          @if (itemDetail(row)) {
+            <span class="item-detail">{{ itemDetail(row) }}</span>
+          }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let row">{{ typeLabel(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="parcel">
+        <th mat-header-cell *matHeaderCellDef>Parcela</th>
+        <td mat-cell *matCellDef="let row">
+          {{ parcelLabel(row) }}
+          @if (groupFullyPaid(row)) {
+            <span class="chip chip-done">Compra quitada</span>
+          }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="payment">
+        <th mat-header-cell *matHeaderCellDef>Pagamento</th>
+        <td mat-cell *matCellDef="let row">{{ paymentLabel(row.paymentMethodId) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef class="num">Valor</th>
+        <td mat-cell *matCellDef="let row" class="num">{{ row.amountCents | brlCents }}</td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span
+            class="chip"
+            [class.chip-pending]="row.recordStatus === 'active' && row.kind === 'installment' && row.paymentStatus === 'pending'"
+            [class.chip-paid]="row.recordStatus === 'active' && (row.kind === 'single' || row.paymentStatus === 'paid')"
+            [class.chip-cancelled]="row.recordStatus === 'cancelled'"
+            [matTooltip]="statusTooltip(row)"
+            [matTooltipDisabled]="!statusTooltip(row)"
+          >
+            {{ statusLabel(row) }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          @if (row.kind === 'installment' && row.paymentStatus === 'pending' && row.recordStatus === 'active') {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openMarkParcelPaid(row)"
+              matTooltip="Marcar parcela como paga"
+              aria-label="Marcar parcela como paga"
+            >
+              <mat-icon>check_circle</mat-icon>
+            </button>
+          }
+          @if (row.kind === 'installment' && row.paymentStatus === 'paid' && row.recordStatus === 'active') {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openMarkParcelUnpaid(row)"
+              matTooltip="Marcar parcela como não paga"
+              aria-label="Marcar parcela como não paga"
+            >
+              <mat-icon>undo</mat-icon>
+            </button>
+          }
+          @if (row.recordStatus === 'active') {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openCancelExpense(row)"
+              matTooltip="Cancelar (mantém histórico)"
+              aria-label="Cancelar gasto"
+            >
+              <mat-icon>block</mat-icon>
+            </button>
+          }
+          @if (row.recordStatus === 'cancelled') {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openUncancelExpense(row)"
+              matTooltip="Descancelar (reativar)"
+              aria-label="Descancelar gasto"
+            >
+              <mat-icon>restore</mat-icon>
+            </button>
+          }
+          <button
+            mat-icon-button
+            type="button"
+            (click)="openEdit(row)"
+            [disabled]="row.kind === 'installment' || row.recordStatus === 'cancelled'"
+            matTooltip="Editar (só à vista e ativo)"
+            aria-label="Editar"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button type="button" (click)="confirmDelete(row)" matTooltip="Excluir definitivamente" aria-label="Excluir">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: columns"
+        [class.row-cancelled]="isCancelled(row)"
+      ></tr>
+    </table>
+  </div>
+}

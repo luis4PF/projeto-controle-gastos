@@ -1,0 +1,25 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: min(100vw - 48px, 400px);
+  padding-top: 0.5rem;
+}
+
+.full {
+  width: 100%;
+}
+
+.kind-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.hint {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  opacity: 0.9;
+}

@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>@if (isEditing) { Editar Pessoa } @else { Nova Pessoa }</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="name" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <mat-error>Campo obrigatório</mat-error>
+      }
+      @if (form.get('name')?.hasError('maxlength') && form.get('name')?.touched) {
+        <mat-error>Máximo 120 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Sobrenome</mat-label>
+      <input matInput formControlName="surname" />
+      @if (form.get('surname')?.hasError('required') && form.get('surname')?.touched) {
+        <mat-error>Campo obrigatório</mat-error>
+      }
+      @if (form.get('surname')?.hasError('maxlength') && form.get('surname')?.touched) {
+        <mat-error>Máximo 120 caracteres</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()">Salvar</button>
+</mat-dialog-actions>

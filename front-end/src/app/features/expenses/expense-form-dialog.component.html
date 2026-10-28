@@ -1,0 +1,159 @@
+<h2 mat-dialog-title>{{ isEdit() ? 'Editar gasto' : 'Novo gasto' }}</h2>
+<form mat-dialog-content class="content" [formGroup]="form">
+  @if (!isEdit()) {
+    <mat-radio-group
+      class="mode-row"
+      [value]="expenseMode"
+      (change)="setExpenseMode($event.value)"
+      aria-label="Tipo de gasto"
+    >
+      <mat-radio-button value="single">À vista (pagamento único)</mat-radio-button>
+      <mat-radio-button value="installment">Parcelado</mat-radio-button>
+    </mat-radio-group>
+    <p class="hint">
+      @if (expenseMode === 'single') {
+        Primeiro escolha o <strong>item</strong> (categoria, ex.: IPVA 2025). Depois complemente com descrição se quiser.
+      } @else {
+        O <strong>item</strong> identifica o que está parcelando; a descrição é opcional (detalhes extras).
+      }
+    </p>
+  }
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Item (categoria)</mat-label>
+    <mat-select formControlName="categoryId">
+      @for (c of categoryOptions; track c.id) {
+        <mat-option [value]="c.id">{{ c.label }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Ex.: IPVA 2025, Supermercado — itens específicos apenas (não categorias).</mat-hint>
+    @if (form.controls.categoryId.hasError('required')) {
+      <mat-error>Obrigatório</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Como foi pago</mat-label>
+    <mat-select formControlName="paymentMethodId">
+      @for (pm of paymentMethods; track pm.id) {
+        <mat-option [value]="pm.id">{{ pmLabel(pm) }}</mat-option>
+      }
+    </mat-select>
+    @if (form.controls.paymentMethodId.hasError('required')) {
+      <mat-error>Informe o método de pagamento</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Quem gastou (opcional)</mat-label>
+    <mat-select formControlName="personId">
+      <mat-option value="">Ninguém em específico</mat-option>
+      @for (person of people; track person.id) {
+        <mat-option [value]="person.id">{{ personFullName(person) }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Se você emprestou o cartão para alguém, selecione aqui. Se deixar em branco, será considerado como seu gasto.</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Descrição / detalhes</mat-label>
+    <textarea
+      matInput
+      formControlName="description"
+      rows="2"
+      placeholder="Opcional — ex.: Posto BR, farmácia centro"
+    ></textarea>
+    @if (form.controls.description.hasError('maxlength')) {
+      <mat-error>Máximo 500 caracteres</mat-error>
+    }
+  </mat-form-field>
+
+  @if (isEdit() || expenseMode === 'single') {
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Valor (R$)</mat-label>
+      <input
+        matInput
+        formControlName="amountDisplay"
+        mask="separator.2"
+        thousandSeparator="."
+        decimalMarker=","
+        prefix="R$ "
+        [dropSpecialCharacters]="false"
+      />
+      @if (form.controls.amountDisplay.hasError('required')) {
+        <mat-error>Obrigatório</mat-error>
+      }
+      @if (form.controls.amountDisplay.hasError('money')) {
+        <mat-error>Informe um valor válido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Data</mat-label>
+      <input matInput [matDatepicker]="dp" formControlName="date" />
+      <mat-datepicker-toggle matIconSuffix [for]="dp" />
+      <mat-datepicker #dp />
+      @if (form.controls.date.hasError('required')) {
+        <mat-error>Obrigatório</mat-error>
+      }
+    </mat-form-field>
+
+    @if (isEdit() && data.expense?.kind === 'installment') {
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Status de pagamento</mat-label>
+        <mat-select formControlName="paymentStatus">
+          <mat-option value="pending">Pendente</mat-option>
+          <mat-option value="paid">Pago</mat-option>
+        </mat-select>
+        <mat-hint>Altere para "Pendente" se quiser desfazer o pagamento desta parcela.</mat-hint>
+      </mat-form-field>
+    }
+  }
+
+  @if (!isEdit() && expenseMode === 'installment') {
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Valor total (R$)</mat-label>
+      <input
+        matInput
+        formControlName="totalAmountDisplay"
+        mask="separator.2"
+        thousandSeparator="."
+        decimalMarker=","
+        prefix="R$ "
+        [dropSpecialCharacters]="false"
+      />
+      @if (form.controls.totalAmountDisplay.hasError('required')) {
+        <mat-error>Obrigatório</mat-error>
+      }
+      @if (form.controls.totalAmountDisplay.hasError('money')) {
+        <mat-error>Informe um valor válido</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="row-2">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Quantidade de parcelas</mat-label>
+        <input matInput type="number" formControlName="installmentCount" min="2" max="360" />
+        @if (form.controls.installmentCount.hasError('required')) {
+          <mat-error>Obrigatório</mat-error>
+        }
+        @if (form.controls.installmentCount.hasError('min')) {
+          <mat-error>Mínimo 2 parcelas</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>1ª parcela — vencimento</mat-label>
+        <input matInput [matDatepicker]="fdp" formControlName="firstDueDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="fdp" />
+        <mat-datepicker #fdp />
+        @if (form.controls.firstDueDate.hasError('required')) {
+          <mat-error>Obrigatório</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  }
+</form>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Fechar</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">Salvar</button>
+</mat-dialog-actions>

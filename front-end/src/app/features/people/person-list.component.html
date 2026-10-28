@@ -1,0 +1,63 @@
+<h1 class="page-title">Pessoas</h1>
+<p class="lead">
+  Cadastre pessoas que podem ser associadas como responsáveis por uma despesa. Por exemplo: um
+  familiar, um amigo, ou outro membro da família que faz compras em comum.
+</p>
+
+<div class="toolbar">
+  <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+    <mat-icon>person_add</mat-icon>
+    Nova Pessoa
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40" />
+  </div>
+} @else {
+  <mat-card appearance="outlined">
+    <table mat-table [dataSource]="rows()" class="full-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="surname">
+        <th mat-header-cell *matHeaderCellDef>Sobrenome</th>
+        <td mat-cell *matCellDef="let row">{{ row.surname }}</td>
+      </ng-container>
+      <ng-container matColumnDef="createdBy">
+        <th mat-header-cell *matHeaderCellDef>Cadastrado por</th>
+        <td mat-cell *matCellDef="let row">{{ createdByLabel(row) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Cadastrado em</th>
+        <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="openEdit(row)"
+            aria-label="Editar pessoa"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            (click)="confirmDelete(row)"
+            aria-label="Excluir pessoa"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+  </mat-card>
+}
+

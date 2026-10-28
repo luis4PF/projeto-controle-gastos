@@ -1,0 +1,118 @@
+.page-title {
+  margin: 0 0 1rem;
+  font: var(--mat-sys-headline-small);
+}
+
+.filters {
+  margin-bottom: 1rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.grow {
+  grid-column: span 1;
+}
+
+@media (min-width: 900px) {
+  .filter-grid .grow:first-child {
+    grid-column: span 2;
+  }
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  padding-top: 0.35rem;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  align-items: center;
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.table-wrap {
+  overflow: auto;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  min-width: 960px;
+}
+
+.chip {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.chip-paid {
+  background-color: color-mix(in srgb, var(--mat-sys-primary) 15%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.chip-pending {
+  background-color: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  color: var(--mat-sys-error);
+}
+
+.chip-done {
+  background-color: color-mix(in srgb, var(--mat-sys-tertiary) 18%, transparent);
+  color: var(--mat-sys-tertiary);
+  margin-left: 0.25rem;
+}
+
+.chip-cancelled {
+  background-color: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.row-cancelled {
+  opacity: 0.72;
+}
+
+.item-cell {
+  max-width: 280px;
+}
+
+.item-primary {
+  display: block;
+  font-weight: 500;
+}
+
+.item-detail {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+th.num {
+  text-align: right;
+}

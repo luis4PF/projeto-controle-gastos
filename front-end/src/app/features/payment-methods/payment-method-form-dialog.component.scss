@@ -1,0 +1,11 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: min(100vw - 48px, 420px);
+  padding-top: 0.5rem;
+}
+
+.full {
+  width: 100%;
+}
